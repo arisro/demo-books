@@ -43,8 +43,8 @@ jobs:
         run: |-
           set -ex
           DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
-          echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
-          echo "APP_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
+          echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"api\") | .endpoints[0]'`" >> /github/envs.txt
+          echo "APP_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"frontend\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
@@ -60,25 +60,23 @@ jobs:
           exit 1
         fi
        
-        curl --fail-with-body "$API_ENDPOINT"
-       
         # Assert empty collection
-        #ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
-        #if [ $ITEMS_COUNT -neq 0 ]; then
-        #  echo "Wrong item count. Expected 0, got $ITEMS_COUNT."
-        #  exit 1
-        #fi
+        ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
+        if [ $ITEMS_COUNT -neq 0 ]; then
+         echo "Wrong item count. Expected 0, got $ITEMS_COUNT."
+         exit 1
+        fi
         
         # Add two items
-        #curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Foo","description":"bar"}'
-        #curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Bar","description":"foo"}'
+        curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Foo","description":"bar"}'
+        curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Bar","description":"foo"}'
         
         # Assert the new collection count
-        #ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
-        #if [ $ITEMS_COUNT -neq 2 ]; then
-        #  echo "Wrong item count. Expected 2, got $ITEMS_COUNT."
-        #  exit 1
-        #fi
+        ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
+        if [ $ITEMS_COUNT -neq 2 ]; then
+         echo "Wrong item count. Expected 2, got $ITEMS_COUNT."
+         exit 1
+        fi
     - name: Frontend tests
       run: |-
         set -ex
