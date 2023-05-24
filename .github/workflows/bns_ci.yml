@@ -10,6 +10,7 @@ jobs:
     outputs:
       envId: ${{ env.BNS_ENV_ID }}
       apiEndpointUrl: ${{ env.API_ENDPOINT_URL }}
+      appEndpointUrl: ${{ env.APP_ENDPOINT_URL }}
     steps:
     - name: Prepare vars
       run: |-
@@ -42,6 +43,7 @@ jobs:
           set -ex
           DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
           echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
+          echo "APP_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
@@ -57,7 +59,26 @@ jobs:
           exit 1
         fi
        
-        curl --fail-with-body "$API_ENDPOINT/books"
+        curl --fail-with-body "$API_ENDPOINT"
+       
+        # Assert empty collection
+        #RESPONSE=`curl --fail-with-body "$API_ENDPOINT/books"`
+        
+        
+        
+        #curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Foo","description":"bar"}'
+        
+        #curl --fail-with-body "$API_ENDPOINT/books"
+    - name: Frontend tests
+      run: |-
+        set -ex
+        APP_ENDPOINT=${{ needs.deploy.outputs.appEndpointUrl }}
+        if [ -z "$APP_ENDPOINT" ]; then
+          echo "No APP_ENDPOINT"
+          exit 1
+        fi
+
+        # curl --fail-with-body "$APP_ENDPOINT"
   cleanup:
     name: Delete CI environment
     runs-on: ubuntu-latest
