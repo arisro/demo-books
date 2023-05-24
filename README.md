@@ -10,7 +10,7 @@ Summary of app functional requirements:
 - We can create, retrieve, update, delete Books.
 - There is a Search bar for searching Books by title.
 
-Inspired from:
+Inspired fromm:
 - https://github.com/bezkoder/react-axios-typescript-example
 - https://github.com/bezkoder/react-axios-typescript-example
 
