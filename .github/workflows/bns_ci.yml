@@ -19,7 +19,6 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v ${{ github.workspace }}:/work
         run: |-
           echo "CLUSTER_ID=`bns k8s-clusters list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --organization ${{ vars.BUNNYSHELL_ORGANIZATION_ID }} --non-interactive -o json | jq -r '._embedded.item[0].id'`" >> "$GITHUB_ENV"
     - name: Create Environment
@@ -32,6 +31,7 @@ jobs:
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
+    needs: deploy
     steps:
     - name: API tests
       run: |-
@@ -39,6 +39,7 @@ jobs:
   cleanup:
     name: Delete CI environment
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Deleting Environment
         uses: addnab/docker-run-action@v3
