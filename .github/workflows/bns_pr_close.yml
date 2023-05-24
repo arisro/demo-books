@@ -17,10 +17,10 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
+        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt -e GITHUB_HEAD_REF="$GITHUB_HEAD_REF"
         run: |-
           set -ex
-
+          echo "$GITHUB_HEAD_REF"
           BNS_ENV_NAME="PR #${{ github.event.number }}"
           BNS_ENV_ID=`bns environments list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
             | jq -r "try ._embedded.item[] | select(.name == \"$BNS_ENV_NAME\") | .id"`
