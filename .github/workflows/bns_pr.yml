@@ -18,7 +18,6 @@ jobs:
       run: |-
         echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_ENV"
         echo "BNS_ENV_NAME=PR #${{ github.event.number }}" >> "$GITHUB_ENV"
-        echo ${{ env.GITHUB_HEAD_REF }}
     - name: Check out the repo
       uses: actions/checkout@v2
     - name: Get Kubernetes integration
@@ -47,7 +46,8 @@ jobs:
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
           set -ex
-          echo "BNS_ENV_ID=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
+          yq '(.components[] | select(.gitBranch != null)).gitBranch |= "asd"' /work/_bunnyshell/env.yaml > /work/_bunnyshell/env_pr.yaml
+          echo "BNS_ENV_ID=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env_pr.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
             | jq -r '.id'`" >> /github/envs.txt
     - name: Deploy Environment
       uses: addnab/docker-run-action@v3
