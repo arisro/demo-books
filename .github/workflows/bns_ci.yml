@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       envId: ${{ env.BNS_ENV_ID }}
+      apiEndpointUrl: ${{ env.API_ENDPOINT_URL }}
     steps:
     - name: Prepare vars
       run: |-
@@ -40,7 +41,7 @@ jobs:
         run: |-
           set -ex
           DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
-          echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
+          echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
@@ -50,7 +51,13 @@ jobs:
     - name: API tests
       run: |-
         set -ex
-        echo "Running API tests on ${{ needs.deploy.outputs.envId }}..."
+        API_ENDPOINT=${{ needs.deploy.outputs.apiEndpointUrl }}
+        if [ -z "$API_ENDPOINT" ]; then
+          echo "No API_ENDPOINT"
+          exit 1
+        fi
+       
+        curl --fail-with-body "$API_ENDPOINT/books"
   cleanup:
     name: Delete CI environment
     runs-on: ubuntu-latest
