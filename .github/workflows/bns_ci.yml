@@ -19,6 +19,6 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v $(pwd):/bns
+        options: -v ${{ github.workspace }}:/work
         run: |-
           bns environments create --from-path /bns/_bunnyshell/env.yaml --name "$BNS_ENV_NAME" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
