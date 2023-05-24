@@ -23,7 +23,7 @@ jobs:
 
           BNS_ENV_NAME="PR #${{ github.event.number }}"
           BNS_ENV_ID=`bns environments list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
-            | jq -r "._embedded.item[] | select(.name == \"$BNS_ENV_NAME\") | .id"`
+            | jq -r "try ._embedded.item[] | select(.name == \"$BNS_ENV_NAME\") | .id"`
           echo "BNS_ENV_ID=$BNS_ENV_ID" >> /github/envs.txt
     - name: Delete Environment
       uses: addnab/docker-run-action@v3
