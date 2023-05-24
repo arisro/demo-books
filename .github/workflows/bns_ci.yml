@@ -23,4 +23,4 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.workspace }}:/work
         run: |-
-          bns environments create --name ${{env.BNS_ENV_NAME}} --from-path /work/_bunnyshell/env.yaml --debug --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
+          bns environments create --name "${{env.BNS_ENV_NAME}}" --from-path /work/_bunnyshell/env.yaml --debug --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
