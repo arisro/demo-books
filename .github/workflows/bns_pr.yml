@@ -1,4 +1,5 @@
 name: Bunnyshell Update PR Environment
+concurrency: bns-pr-${{ github.event.number }}
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
