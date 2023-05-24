@@ -52,6 +52,7 @@ jobs:
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
           set -ex
+          echo "BNS_ENV_CREATED=1" >> /github/envs.txt
           echo "BNS_ENV_ID=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env_pr.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
             | jq -r '.id'`" >> /github/envs.txt
     - name: Deploy Environment
@@ -64,6 +65,12 @@ jobs:
           DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
           echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
           echo "APP_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | grep -A 100 '\[' | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
+      if: "${{ env.BNS_ENV_CREATED == '1' }}"
+      with:
+        message: |
+          Hello world ! :wave:
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
