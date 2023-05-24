@@ -32,7 +32,7 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
+        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt -e BNS_ENV_ID="${{ env.BNS_ENV_ID }}"
         run: |-
           env
           #echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"backend\") | .endpoints[0]'`" >> /github/envs.txt
