@@ -7,6 +7,8 @@ jobs:
   deploy:
     name: Deploy CI environment
     runs-on: ubuntu-latest
+    outputs:
+      envId: ${{ env.BNS_ENV_ID }}
     steps:
     - name: Prepare vars
       run: |-
@@ -48,17 +50,17 @@ jobs:
     - name: API tests
       run: |-
         set -ex
-        env
-        echo "Running API tests on ${{ env.BNS_ENV_NAME }}..."
+        echo "Running API tests on ${{ needs.deploy.outputs.envId }}..."
   cleanup:
     name: Delete CI environment
     runs-on: ubuntu-latest
-    needs: test
+    if: "${{ needs.deploy.outputs.envId != '' }}"
+    needs: [deploy, test]
     steps:
       - name: Deleting Environment
         uses: addnab/docker-run-action@v3
         with:
           image: bunnyshell/cli:latest
           run: |-
-            bns environments delete --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive
+            bns environments delete --id ${{ needs.deploy.outputs.envId }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive
         
