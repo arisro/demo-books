@@ -15,7 +15,7 @@ jobs:
       appEndpointUrl: ${{ env.APP_ENDPOINT_URL }}
     steps:
     - name: setup-yq
-      uses: chrisdickinson/setup-yq@v1.0.0
+      uses: frenck/action-setup-yq@v1
     - name: Prepare vars
       run: |-
         echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_ENV"
