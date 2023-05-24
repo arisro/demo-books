@@ -25,9 +25,11 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v ${{ github.workspace }}:/work
+        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
-          bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --deploy --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
+          DEPLOY_OUTPUT=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --deploy --no-progress --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json`
+          echo "BNS_ENV_ID=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[0].environment'`" >> /github/envs.txt
+          echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"backend\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
@@ -36,6 +38,7 @@ jobs:
     steps:
     - name: API tests
       run: |-
+        env
         echo "Running API tests on ${{ env.BNS_ENV_NAME }}..."
   cleanup:
     name: Delete CI environment
@@ -47,6 +50,7 @@ jobs:
         with:
           image: bunnyshell/cli:latest
           run: |-
-            echo "DELETE env
+            env
+            echo "DELETE env"
             # bns environments delete --id "${{env.BNS_ENV_NAME}}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive
         
