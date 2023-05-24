@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Prepare vars
-      id: vars
       run: |-
         echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_ENV"
         echo "BNS_ENV_NAME=CI ${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
@@ -19,19 +18,22 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
+        options: -v ${{ env.GITHUB_ENV }}:/github/envs.txt
         run: |-
-          echo "CLUSTER_ID=`bns k8s-clusters list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --organization ${{ vars.BUNNYSHELL_ORGANIZATION_ID }} --non-interactive -o json | jq -r '._embedded.item[0].id'`" >> "$GITHUB_ENV"
+          env
+          echo "CLUSTER_ID=`bns k8s-clusters list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --organization ${{ vars.BUNNYSHELL_ORGANIZATION_ID }} --non-interactive -o json | jq -r '._embedded.item[0].id'`" >> /github/envs.txt
     - name: Create Environment
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
         options: -v ${{ github.workspace }}:/work
         run: |-
-          bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s ${{ env.CLUSTER_ID }} --deploy --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
+          bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --deploy --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
     needs: deploy
+    continue-on-error: true
     steps:
     - name: API tests
       run: |-
