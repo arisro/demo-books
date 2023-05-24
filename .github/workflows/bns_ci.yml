@@ -20,6 +20,7 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.env }}:/github/envs.txt
         run: |-
+          set -ex
           echo "CLUSTER_ID=`bns k8s-clusters list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --organization ${{ vars.BUNNYSHELL_ORGANIZATION_ID }} --non-interactive -o json | jq -r '._embedded.item[0].id'`" >> /github/envs.txt
     - name: Create Environment
       uses: addnab/docker-run-action@v3
@@ -27,6 +28,7 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
+          set -ex
           echo "BNS_ENV_ID=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json | jq -r '.id'`" >> /github/envs.txt
     - name: Deploy Environment
       uses: addnab/docker-run-action@v3
@@ -34,7 +36,8 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
-          DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --from-path /work/_bunnyshell/env.yaml --k8s ${{ env.CLUSTER_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json`
+          set -ex
+          DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
           echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
@@ -44,6 +47,7 @@ jobs:
     steps:
     - name: API tests
       run: |-
+        set -ex
         env
         echo "Running API tests on ${{ env.BNS_ENV_NAME }}..."
   cleanup:
