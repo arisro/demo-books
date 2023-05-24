@@ -1,0 +1,23 @@
+name: Bunnyshell CI
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update:
+    name: Deploy CI environment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Prepare vars
+      id: vars
+      run: |-
+        echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> "$GITHUB_ENV"
+        echo "BNS_ENV_NAME=CI $GITHUB_RUN_ID" >> "$GITHUB_ENV"
+    - name: Check out the repo
+      uses: actions/checkout@v2
+    - name: Create Environment
+      uses: addnab/docker-run-action@v3
+      with:
+        image: bunnyshell/cli:latest
+        run: |-
+          bns environments create --from-path _bunnyshell/env.yaml --name "$BNS_ENV_NAME" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json
