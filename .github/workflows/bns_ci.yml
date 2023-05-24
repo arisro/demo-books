@@ -20,7 +20,6 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.env }}:/github/envs.txt
         run: |-
-          env
           echo "CLUSTER_ID=`bns k8s-clusters list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --organization ${{ vars.BUNNYSHELL_ORGANIZATION_ID }} --non-interactive -o json | jq -r '._embedded.item[0].id'`" >> /github/envs.txt
     - name: Create Environment
       uses: addnab/docker-run-action@v3
