@@ -27,9 +27,16 @@ jobs:
         image: bunnyshell/cli:latest
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
-          DEPLOY_OUTPUT=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --deploy --no-progress --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json`
-          echo "BNS_ENV_ID=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[0].environment'`" >> /github/envs.txt
-          echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"backend\") | .endpoints[0]'`" >> /github/envs.txt
+          echo "BNS_ENV_ID=`bns environments create --name "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json | jq -r '.id'`" >> /github/envs.txt
+    - name: Deploy Environment
+      uses: addnab/docker-run-action@v3
+      with:
+        image: bunnyshell/cli:latest
+        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
+        run: |-
+          env
+          #echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"backend\") | .endpoints[0]'`" >> /github/envs.txt
+          #echo "BNS_ENV_ID=`bns environments deploy --id "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json | jq -r '.id'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
