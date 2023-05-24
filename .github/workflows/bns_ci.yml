@@ -32,11 +32,10 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: bunnyshell/cli:latest
-        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt -e BNS_ENV_ID="${{ env.BNS_ENV_ID }}"
+        options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
-          env
-          #echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"backend\") | .endpoints[0]'`" >> /github/envs.txt
-          #echo "BNS_ENV_ID=`bns environments deploy --id "${{ env.BNS_ENV_NAME }}" --from-path /work/_bunnyshell/env.yaml --k8s "${{ env.CLUSTER_ID }}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json | jq -r '.id'`" >> /github/envs.txt
+          DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --from-path /work/_bunnyshell/env.yaml --k8s ${{ env.CLUSTER_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json`
+          echo "API_ENDPOINT=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
@@ -57,7 +56,5 @@ jobs:
         with:
           image: bunnyshell/cli:latest
           run: |-
-            env
-            echo "DELETE env"
-            # bns environments delete --id "${{env.BNS_ENV_NAME}}" --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive
+            bns environments delete --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive
         
