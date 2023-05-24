@@ -16,6 +16,7 @@ jobs:
     - name: DEBUG
       run: |-
         env
+        echo ${{ env.GITHUB_HEAD_REF }}
     - name: Check existing Environment
       uses: addnab/docker-run-action@v3
       with:
