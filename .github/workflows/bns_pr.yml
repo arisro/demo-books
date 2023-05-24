@@ -70,7 +70,9 @@ jobs:
       if: "${{ env.BNS_ENV_CREATED == '1' }}"
       with:
         message: |
-          Hello world ! :wave:
+          *Bunnyshell* Environment created with the following endpoints:
+          - ${{ env.APP_ENDPOINT_URL }}
+          - ${{ env.API_ENDPOINT_URL }}
   test:
     name: Run E2E tests
     runs-on: ubuntu-latest
