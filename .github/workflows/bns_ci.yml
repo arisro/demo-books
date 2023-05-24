@@ -61,18 +61,18 @@ jobs:
         fi
        
         # Assert empty collection
-        ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
+        ITEMS_COUNT=`curl -s --fail-with-body "${API_ENDPOINT%/}/books" | jq 'length'`
         if [ $ITEMS_COUNT -neq 0 ]; then
          echo "Wrong item count. Expected 0, got $ITEMS_COUNT."
          exit 1
         fi
         
         # Add two items
-        curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Foo","description":"bar"}'
-        curl --fail-with-body -X POST -H 'Content-Type: application/json' "$API_ENDPOINT/books" -d '{"title":"Bar","description":"foo"}'
+        curl -s --fail-with-body -X POST -H 'Content-Type: application/json' "${API_ENDPOINT%/}/books" -d '{"title":"Foo","description":"bar"}'
+        curl -s --fail-with-body -X POST -H 'Content-Type: application/json' "${API_ENDPOINT%/}/books" -d '{"title":"Bar","description":"foo"}'
         
         # Assert the new collection count
-        ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
+        ITEMS_COUNT=`curl -s --fail-with-body "${API_ENDPOINT%/}/books" | jq 'length'`
         if [ $ITEMS_COUNT -neq 2 ]; then
          echo "Wrong item count. Expected 2, got $ITEMS_COUNT."
          exit 1
@@ -86,7 +86,7 @@ jobs:
           exit 1
         fi
 
-        curl --fail-with-body "$APP_ENDPOINT"
+        curl -s --fail-with-body "$APP_ENDPOINT"
   cleanup:
     name: Delete CI environment
     runs-on: ubuntu-latest
