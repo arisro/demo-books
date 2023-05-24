@@ -1,4 +1,6 @@
 name: Bunnyshell Delete PR Environment
+concurrency:
+  group: bns-pr-${{ github.event.number }}
 on:
   pull_request_target:
     types: [closed]
