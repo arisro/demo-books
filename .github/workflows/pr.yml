@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   deploy:
-    name: Deploy CI environment
+    name: Deploy PR Environment
     runs-on: ubuntu-latest
     outputs:
       envId: ${{ env.BNS_ENV_ID }}
