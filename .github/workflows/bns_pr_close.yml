@@ -13,9 +13,6 @@ jobs:
     steps:
     - name: Check out the repo
       uses: actions/checkout@v2
-    - name: Prepare vars
-      run: |-
-        echo "GITHUB_HEAD_REF=$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
     - name: Check existing Environment
       uses: addnab/docker-run-action@v3
       with:
@@ -23,7 +20,6 @@ jobs:
         options: -v ${{ github.workspace }}:/work -v ${{ github.env }}:/github/envs.txt
         run: |-
           set -ex
-          echo "${{ env.GITHUB_HEAD_REF }}"
           BNS_ENV_NAME="PR #${{ github.event.number }}"
           BNS_ENV_ID=`bns environments list --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --project ${{ vars.BUNNYSHELL_PROJECT_ID }} --non-interactive -o json \
             | jq -r "try ._embedded.item[] | select(.name == \"$BNS_ENV_NAME\") | .id"`
