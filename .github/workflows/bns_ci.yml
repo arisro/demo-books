@@ -2,7 +2,7 @@ name: Bunnyshell CI
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   update:
     name: Deploy CI environment
