@@ -1,4 +1,4 @@
-name: Bunnyshell PR Environment
+name: Bunnyshell Update PR Environment
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
