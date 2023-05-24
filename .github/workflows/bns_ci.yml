@@ -42,6 +42,7 @@ jobs:
         run: |-
           set -ex
           DEPLOY_OUTPUT=`bns environments deploy --id ${{ env.BNS_ENV_ID }} --token ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }} --non-interactive -o json`
+          echo $DEPLOY_OUTPUT
           echo "API_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
           echo "APP_ENDPOINT_URL=`echo \"$DEPLOY_OUTPUT\" | jq -r '.[] | select(.name == \"nginx\") | .endpoints[0]'`" >> /github/envs.txt
   test:
@@ -62,7 +63,11 @@ jobs:
         curl --fail-with-body "$API_ENDPOINT"
        
         # Assert empty collection
-        #RESPONSE=`curl --fail-with-body "$API_ENDPOINT/books"`
+        #ITEMS_COUNT=`curl --fail-with-body "$API_ENDPOINT/books" | jq 'length'`
+        #if [ $ITEMS_COUNT -neq 2 ]; then
+        #  echo "Wrong item count. Expected 2, got $ITEMS_COUNT."
+        #  exit 1
+        #fi
         
         
         
