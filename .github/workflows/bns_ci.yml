@@ -1,4 +1,5 @@
 name: Bunnyshell CI
+concurrency: bns-ci
 on:
   push:
     branches:
