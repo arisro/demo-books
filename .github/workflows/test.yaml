@@ -1,0 +1,25 @@
+name: Bunnyshell CI
+on:
+  push:
+    branches:
+      - master
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    run: sleep 5 && echo Done
+  job2:
+    runs-on: ubuntu-latest
+    run: sleep 5 && echo Done
+    needs: job1
+  job2b:
+    runs-on: ubuntu-latest
+    run: sleep 30 && echo Done
+    needs: job1
+  job3:
+    runs-on: ubuntu-latest
+    run: sleep 5 && echo Done
+    needs: [job1,job2]
+  job4:
+    runs-on: ubuntu-latest
+    run: sleep 5 && echo Done
+    needs: [job2]
